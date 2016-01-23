@@ -7,3 +7,4 @@ Scripts for processing human airway geometries for CFD simulation
 * triangle-io.jl : Julia functions for loading and saving in Jonathan Shewchuk's Triangle format.
 * remove-dup.mlx : MeshLab filter script for removing duplicate vertices (useful on output of mesh-plane-cut.jl)
 * cut-mean-mesh.sh : Script for cutting a box around the mean mesh and also cutting the tracheal plane (requires Meshlab and Julia).
+* cut-mesh-plane.jl : Julia script to cut a mesh along a plane. Identical to MeshMixer's 'plane cut' function easier to automate.
