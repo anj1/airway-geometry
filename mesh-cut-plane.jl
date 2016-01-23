@@ -32,7 +32,7 @@ end
 
 using ImmutableArrays
 using GeometryTypes
-include("../OFF.jl")
+include("OFF.jl")
 include("triangle-io.jl")
 
 typealias Vtx{T} ImmutableArrays.Vector3{T}
