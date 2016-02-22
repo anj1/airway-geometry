@@ -1,4 +1,5 @@
 using Meshes
+import Meshes.Face
 using ImmutableArrays
 
 function read_OFF(filename)
