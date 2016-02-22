@@ -61,7 +61,7 @@ function bend_vert(vert)
 
 	vert1 = xform_vert(vert, i1)
 	vert2 = xform_vert(vert, i1)
-	(1-fpart)*vert1 + fpart*vert2
+	(1.0-fpart)*vert1 + fpart*vert2
 end
 
 newverts = [bend_vert(v) for v in verts]
