@@ -15,7 +15,7 @@ vmtksurfacereader -ifile /tmp/model.vtp --pipe vmtksurfacewriter -ofile /tmp/mod
 
 
 # export mesh to OFF
-meshlabserver -i /tmp/model.stl -o /tmp/model.OFF
+meshlabserver -i /tmp/model.stl -o /tmp/model.OFF -s remove-dup.xml
 
 # clean up
 rm /tmp/image_volume.vti
