@@ -4,7 +4,7 @@ include("OFF.jl")
 r = 60.0
 slices = 1:300
 
-# TODO:
+orientation = :native  # :coronal
 
 # TODO: compute this from SC, etc.
 # The exact z-values aren't important;
@@ -36,10 +36,16 @@ transl_2 = Array{Float64,1}[read(fid[id])["transl_2"]   for id in slc_ids];
 println("Reading input mesh.")
 verts, faces = read_OFF(ifile)
 
+if orientation == :native
+	verts = Vector3{Float64}[Vector3(v[1],v[3],80-v[2]) for v in verts]
+	orientation = :coronal
+end
+
 # reverses the forward transformation implied by the slicexforms file
 function xform_vert(vert,i)
 	v = convert(Array,vert)
-	v = v .- [0.0,v[2],300.0]  # bring to y=0 plane
+	#v = v .- [0.0,v[2],300.0]  # bring to y=0 plane
+	v = v .- [0.0,v[2],0.0]  # bring to y=0 plane
 	v2 = (invrot[i]*(v-transl_2[i]))-transl_1[i]
 	Vector3(v2)
 end
@@ -49,7 +55,8 @@ end
 # rotations given by the adjacent slices.
 function bend_vert(vert)
 	# find slices that the pixel is between
-	fpart,ipart = modf((153.281-vert[2])/spacing[2])
+	#fpart,ipart = modf((153.281-vert[2])/spacing[2])
+	fpart,ipart = modf(vert[2]/spacing[2])
 	i2 = round(Integer,ipart)+1
 	i1 = i2-1
 
@@ -67,5 +74,8 @@ function bend_vert(vert)
 	(1.0-fpart)*vert1 + fpart*vert2
 end
 
+println("Transforming.")
 newverts = Vector3{Float64}[bend_vert(v) for v in verts]
+
+println("Writing output mesh.")
 writeOFF(ofile, newverts, faces)
