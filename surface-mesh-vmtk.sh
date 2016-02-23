@@ -16,7 +16,6 @@ vmtkimagereader -spacing $spacing -ifile $in_file --pipe vmtkimagewriter.py -ofi
 vmtkmarchingcubes -l 255.0 -connectivity 1 -ifile /tmp/image_volume.vti -ofile /tmp/model.vtp
 vmtksurfacereader -ifile /tmp/model.vtp --pipe vmtksurfacewriter -ofile /tmp/model.stl
 
-
 # export mesh to OFF
 meshlabserver -i /tmp/model.stl -o /tmp/model.off -s remove-dup.xml
 
@@ -24,3 +23,9 @@ meshlabserver -i /tmp/model.stl -o /tmp/model.off -s remove-dup.xml
 rm /tmp/image_volume.vti
 rm /tmp/model.vtp
 rm /tmp/model.stl
+
+~/src/julia-0.4/julia bend-mesh.jl ../airway/data/slicexforms.hdf5 /tmp/model.off /tmp/modelb.off
+rm /tmp/model.off
+
+meshlabserver -i /tmp/modelb.off -o /tmp/modelb.ply
+rm /tmp/modelb.off
