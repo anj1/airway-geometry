@@ -69,9 +69,18 @@ function bend_vert(vert)
 		i2=1
 	end
 
-	vert1 = xform_vert(vert, i1)
-	vert2 = xform_vert(vert, i2)
-	(1.0-fpart)*vert1 + fpart*vert2
+	#vert1 = xform_vert(vert, i1)
+	#vert2 = xform_vert(vert, i2)
+	#(1.0-fpart)*vert1 + fpart*vert2
+
+	t1 = (1.0 - fpart)*transl_1[i1] + fpart*transl_1[i2]
+	ir = (1.0 - fpart)*invrot[i1]   + fpart*invrot[i2]  
+	t2 = (1.0 - fpart)*transl_2[i1] + fpart*transl_2[i2]
+
+	v = convert(Array, vert)
+	v = v .- [0.0,v[2],0.0]  # bring to y=0 plane
+	v2 = (ir*(v-t2))-t1
+	Vector3(v2)
 end
 
 println("Transforming.")
