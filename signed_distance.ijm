@@ -1,4 +1,5 @@
 path = getDirectory("Choose the folder for output.");
+runMacro(path + "/smooth_mask.ijm");
 
 // Select image and set voxel size
 selectWindow("avg");
@@ -30,7 +31,6 @@ run("Close")
 // Smooth out orbital regions.
 // This is done by selectively smoothing (using a mask)
 // areas outside the nasal cavity, with radius=5.0
-runMacro(path + "/smooth_mask.ijm");
 selectWindow("signdist_smth");
 run("Duplicate...", "duplicate");
 imageCalculator("Multiply create 32-bit stack", "signdist_smth-1", "smooth_mask");
