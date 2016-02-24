@@ -11,4 +11,4 @@ Scripts for processing human airway geometries for CFD simulation
 * **cut-mesh-plane.jl** : Julia script to cut a mesh along a plane. Identical to [MeshMixer](http://www.meshmixer.com/)'s 'plane cut' function easier to automate. Requires installation of [Triangle](https://www.cs.cmu.edu/~quake/triangle.html).
 * **bend-mesh.jl** : One step in processing meshes is to take angled cross-sections across different parts of the mesh. This script takes a mesh generated with such cross-sections and transforms it back to a straightened mesh.
 * **OFF.jl** : Julia functions for loading/saving [OFF](https://en.wikipedia.org/wiki/OFF_(file_format)) files.
-* **signed_distance.ijm** : [ImageJ](http://fiji.sc/Fiji) [script](http://rsbweb.nih.gov/ij/docs/macro_reference_guide.pdf) to compute the signed distance of a stack of images and save it as 32-bit TIFF.
+* **signed_distance.ijm** : [ImageJ](http://fiji.sc/Fiji) [script](http://rsbweb.nih.gov/ij/docs/macro_reference_guide.pdf) to compute the signed distance of a stack of images and save it as 32-bit TIFF. Requires input stack to be named 'avg'.
