@@ -68,7 +68,6 @@ end
 # reverses the forward transformation implied by the slicexforms file
 function xform_vert(vert,i)
 	v = convert(Array,vert)
-	#v = v .- [0.0,v[2],300.0]  # bring to y=0 plane
 	v = v .- [0.0,v[2],0.0]  # bring to y=0 plane
 	v2 = (invrot[i]*(v-transl_2[i]))-transl_1[i]
 	Vector3(v2)
