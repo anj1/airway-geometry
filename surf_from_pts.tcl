@@ -9,10 +9,10 @@ ic_set_global geo_cad 0.07 toler
 
 # create new points using Base point + delta
 ic_undo_group_begin
-ic_point {} OPENING pnt.1.1 pnt.1+vector(0,-10,-50)
-ic_point {} OPENING pnt.2.1 pnt.2+vector(0,-10,-50)
-ic_point {} OPENING pnt.3.1 pnt.3+vector(0,-30,-55)
-ic_point {} OPENING pnt.4.1 pnt.4+vector(0,-30,-55)
+ic_point {} OPENING pnt.1.1 pnt.1+vector(0,50,-10)
+ic_point {} OPENING pnt.2.1 pnt.2+vector(0,50,-10)
+ic_point {} OPENING pnt.3.1 pnt.3+vector(0,55,-30)
+ic_point {} OPENING pnt.4.1 pnt.4+vector(0,55,-30)
 
 # create curves from face to box
 ic_curve point OPENING crv.opening.1 {pnt.1 pnt.1.1}

@@ -12,7 +12,7 @@ ic_boco_set_part_color INLET
 ic_point curve_end INLET pnt.00 {crv.inlet both}
 
 # create new point using Base point + Delta
-ic_point {} INLET pnt.02 pnt.00+vector(0,-100,15)
+ic_point {} INLET pnt.02 pnt.00+vector(0,-15,-100)
 
 # create line connecting the two points
 ic_curve point INLET crv.trachea {pnt.00 pnt.02}
@@ -22,7 +22,7 @@ ic_geo_cre_srf_crv_drv_srf INLET srf.trachea crv.inlet crv.trachea 1
 ic_reinit_geom_objects 
 
 # move inlet 
-ic_move_geometry surface names srf.inlet translate {0 -100 10}
+ic_move_geometry surface names srf.inlet translate {0 -10 -100}
 ic_geo_reset_data_structures 
 
 # assigning surface to INLET part

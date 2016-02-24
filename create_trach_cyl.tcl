@@ -28,7 +28,7 @@ ic_curve arc_ctr_rad INLET crv.circ.trachea {pnt.center pnt.11 pnt.12 $radius 0 
 ic_delete_geometry point names {pnt.11 pnt.12} 0 1
 
 # move circle
-ic_move_geometry curve names crv.circ.trachea translate {0 -30 4.5}
+ic_move_geometry curve names crv.circ.trachea translate {0 -4.5 -30}
 
 # delete tracheal surface
 ic_delete_geometry surface names srf.inlet 0
@@ -38,7 +38,7 @@ ic_geo_cre_srf_loft_crvs INLET srf.loft.trachea 0.1 {crv.inlet crv.circ.trachea}
 
 # create end circle for final extension part
 ic_geo_duplicate_set_fam_and_data curve crv.circ.trachea crv.circ.inlet {} _0
-ic_move_geometry curve names crv.circ.inlet translate {0 -100 15}
+ic_move_geometry curve names crv.circ.inlet translate {0 -15 -100}
 ic_geo_reset_data_structures
 
 # loft and create final extension part
