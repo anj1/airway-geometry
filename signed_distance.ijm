@@ -1,3 +1,5 @@
+path = getDirectory("Choose the folder for output.");
+
 // Select image and set voxel size
 selectWindow("avg");
 run("Properties...", "channels=1 slices=300 frames=1 unit=pixel pixel_width=0.1000 pixel_height=0.1000 voxel_depth=0.512");
@@ -28,23 +30,24 @@ run("Close")
 // Smooth out orbital regions.
 // This is done by selectively smoothing (using a mask)
 // areas outside the nasal cavity, with radius=5.0
+runMacro(path + "/smooth_mask.ijm");
 selectWindow("signdist_smth");
 run("Duplicate...", "duplicate");
-imageCalculator("Multiply create 32-bit stack", "signdist_smth-1", "smooth_mask.tif");
+imageCalculator("Multiply create 32-bit stack", "signdist_smth-1", "smooth_mask");
 selectWindow("signdist_smth-1");
 run("Close")
 selectWindow("signdist_smth");
 run("Smooth (3D)", "method=Gaussian sigma=5.000 use");
 selectWindow("signdist_smth");
 run("Close")
-selectWindow("smooth_mask.tif");
+selectWindow("smooth_mask");
 run("Invert")
-imageCalculator("Multiply create 32-bit stack", "Smoothed", "smooth_mask.tif");
+imageCalculator("Multiply create 32-bit stack", "Smoothed", "smooth_mask");
 selectWindow("Smoothed");
 run("Close")
 
 imageCalculator("Add create 32-bit stack", "Result of signdist_smth-1", "Result of Smoothed");
-saveAs("Tiff", "signdist_smth.tif");
+saveAs("Tiff", path + "/signdist_smth.tif");
 selectWindow("Result of signdist_smth-1");
 run("Close")
 selectWindow("Result of Smoothed");
