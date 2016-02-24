@@ -24,13 +24,37 @@ slicexform_filename = ARGS[1]
 ifile = ARGS[2]
 ofile = ARGS[3]
 
+type SliceTransform{T}
+	transl_1::Vector{T}
+	invrot::Matrix{T}
+	transl_2::Vector{T}
+end
+function read_transform(d)
+	t1 = d["transl_1"]
+	ir = d["rot_1"]
+	t2 = d["transl_2"]
+	SliceTransform(t1,inv(ir),t2)
+end
+function interp_transform(x,y,fpart)
+	t1 = (1.0 - fpart)*x.transl_1 + fpart*y.transl_1
+	ir = (1.0 - fpart)*x.invrot   + fpart*y.invrot
+	t2 = (1.0 - fpart)*x.transl_2 + fpart*y.transl_2
+	SliceTransform(t1,ir,t2)
+end
+function deapply_transform{T}(vert::Vector3{T},x)
+	v = convert(Array, vert)
+	v = v .- [0.0,v[2],0.0]  # bring to y=0 plane
+	v2 = (x.invrot*(v-x.transl_2))-x.transl_1
+	Vector3{T}(v2)
+end
+
+
 # -----------------------------------------------
 println("loading slice transforms")
 fid = h5open(slicexform_filename,"r")
 slc_ids = [@sprintf("%04d",i) for i in slices];
-transl_1 = Array{Float64,1}[read(fid[id])["transl_1"]   for id in slc_ids];
-invrot   = Array{Float64,2}[inv(read(fid[id])["rot_1"]) for id in slc_ids];
-transl_2 = Array{Float64,1}[read(fid[id])["transl_2"]   for id in slc_ids];
+xforms = SliceTransform{Float64}[read_transform(read(fid[id])) for id in slc_ids]
+close(fid)
 
 # load input
 println("Reading input mesh.")
@@ -55,7 +79,6 @@ end
 # rotations given by the adjacent slices.
 function bend_vert(vert)
 	# find slices that the pixel is between
-	#fpart,ipart = modf((153.281-vert[2])/spacing[2])
 	fpart,ipart = modf(vert[2]/spacing[2])
 	i2 = round(Integer,ipart)+1
 	i1 = i2-1
@@ -69,18 +92,8 @@ function bend_vert(vert)
 		i2=1
 	end
 
-	#vert1 = xform_vert(vert, i1)
-	#vert2 = xform_vert(vert, i2)
-	#(1.0-fpart)*vert1 + fpart*vert2
-
-	t1 = (1.0 - fpart)*transl_1[i1] + fpart*transl_1[i2]
-	ir = (1.0 - fpart)*invrot[i1]   + fpart*invrot[i2]  
-	t2 = (1.0 - fpart)*transl_2[i1] + fpart*transl_2[i2]
-
-	v = convert(Array, vert)
-	v = v .- [0.0,v[2],0.0]  # bring to y=0 plane
-	v2 = (ir*(v-t2))-t1
-	Vector3(v2)
+	x = interp_transform(xforms[i1], xforms[i2], fpart)
+	deapply_transform(vert, x)
 end
 
 println("Transforming.")
