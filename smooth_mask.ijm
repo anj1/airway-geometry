@@ -12,6 +12,7 @@ run("Gaussian Blur...", "sigma=24");
 imageCalculator("Add create 32-bit", "smooth_maska.png","smooth_maskb.png");
 rename("smooth_mask")
 run("Divide...", "value=255.000");
+setMinAndMax(0.0, 1.0)
 
 // close previous windows
 selectWindow("smooth_maska.png")
