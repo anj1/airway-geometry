@@ -1,7 +1,7 @@
 // settings.
 // use Plugins->Process->Exact Euclidean Distance Transform (3D)
 // instead of subtraction.
-use_native_edt=true;
+use_native_edt=false;
 // if the above is false, subtract 1 and clamp to 0
 // before subtraction
 clamp_zero=false;
