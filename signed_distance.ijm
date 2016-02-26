@@ -7,7 +7,10 @@ use_native_edt=false;
 clamp_zero=false;
 // Anisotropic smooth at the end.
 aniso_smth=true;
-
+// Smooth before interpolation?
+pre_smth=false;
+// Interpolate?
+interp=true;
 
 path = getDirectory("Choose the folder for output.");
 runMacro(path + "/smooth_mask.ijm");
@@ -49,10 +52,12 @@ if(use_native_edt){
 }
 
 
+selectWindow("EDT");
 // Perform single-pixel smoothing so that we
 // get nice sub-pixel curves.
-selectWindow("EDT");
-run("Smooth (3D)", "method=Gaussian sigma=0.100 use");
+if(pre_smth){
+	run("Smooth (3D)", "method=Gaussian sigma=0.100 use");
+}
 rename("signdist_smth");
 
 selectWindow("EDT");
@@ -77,6 +82,9 @@ selectWindow("Smoothed");
 run("Close");
 
 imageCalculator("Add create 32-bit stack", "Result of signdist_smth-1", "Result of Smoothed");
+if(interp){
+	run("Size...", "width=600 height=800 depth=600 constrain average interpolation=Bilinear");
+}
 if(aniso_smth){
 	run("Gaussian Blur 3D...", "x=1 y=1 z=1");
 }
