@@ -57,11 +57,13 @@ selectWindow("EDT");
 // get nice sub-pixel curves.
 if(pre_smth){
 	run("Smooth (3D)", "method=Gaussian sigma=0.100 use");
+	rename("signdist_smth");
+	selectWindow("EDT");
+	run("Close");
+} else {
+	rename("signdist_smth");
 }
-rename("signdist_smth");
 
-selectWindow("EDT");
-run("Close");
 
 // Smooth out orbital regions.
 // This is done by selectively smoothing (using a mask)
