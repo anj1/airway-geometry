@@ -1,3 +1,14 @@
+// settings.
+// use Plugins->Process->Exact Euclidean Distance Transform (3D)
+// instead of subtraction.
+use_native_edt=true;
+// if the above is false, subtract 1 and clamp to 0
+// before subtraction
+clamp_zero=false;
+// Anisotropic smooth at the end.
+aniso_smth=true;
+
+
 path = getDirectory("Choose the folder for output.");
 runMacro(path + "/smooth_mask.ijm");
 
@@ -6,27 +17,46 @@ selectWindow("avg");
 run("Properties...", "channels=1 slices=300 frames=1 unit=pixel pixel_width=0.1000 pixel_height=0.1000 voxel_depth=0.512");
 
 // Compute signed distance.
-// First, compute forward and inverse distance maps.
-run("3D Distance Map", "map=EDT image=avg mask=None threshold=1");
-run("3D Distance Map", "map=EDT image=avg mask=None threshold=1 inverse");
-rename("EDTi")
+// There are two ways to do this: the built-in plugin,
+// Or forward and inverse distance maps and subtraction.
+selectWindow("avg");
+if(use_native_edt){
+	run("Exact Signed Euclidean Distance Transform (3D)");
+} else {
+	// First, compute forward and inverse distance maps.
+	run("3D Distance Map", "map=EDT image=avg mask=None threshold=1");
+	run("3D Distance Map", "map=EDT image=avg mask=None threshold=1 inverse");
+	rename("EDTi");
 
-// Subtract the distance maps from each other
-// (and close original windows to save space)
-imageCalculator("Subtract create 32-bit stack", "EDT","EDTi");
-selectWindow("EDT");
-run("Close");
-selectWindow("EDTi");
-run("Close");
+	if(clamp_zero){
+		selectWindow("EDT");
+		run("Subtract...", "value=0.1 stack");
+		run("Min...", "value=0 stack");
+		selectWindow("EDTi");
+		run("Subtract...", "value=0.1 stack");
+		run("Min...", "value=0 stack");
+	}
+
+	// Subtract the distance maps from each other
+	// (and close original windows to save space)
+	imageCalculator("Subtract create 32-bit stack", "EDT","EDTi");
+	selectWindow("EDT");
+	run("Close");
+	selectWindow("EDTi");
+	run("Close");
+	selectWindow("Result of EDT");
+	rename("EDT");
+}
+
 
 // Perform single-pixel smoothing so that we
 // get nice sub-pixel curves.
-selectWindow("Result of EDT");
+selectWindow("EDT");
 run("Smooth (3D)", "method=Gaussian sigma=0.100 use");
-rename("signdist_smth")
+rename("signdist_smth");
 
-selectWindow("Result of EDT");
-run("Close")
+selectWindow("EDT");
+run("Close");
 
 // Smooth out orbital regions.
 // This is done by selectively smoothing (using a mask)
@@ -35,20 +65,23 @@ selectWindow("signdist_smth");
 run("Duplicate...", "duplicate");
 imageCalculator("Multiply create 32-bit stack", "signdist_smth-1", "smooth_mask");
 selectWindow("signdist_smth-1");
-run("Close")
+run("Close");
 selectWindow("signdist_smth");
 run("Smooth (3D)", "method=Gaussian sigma=5.000 use");
 selectWindow("signdist_smth");
-run("Close")
+run("Close");
 selectWindow("smooth_mask");
-run("Invert")
+run("Invert");
 imageCalculator("Multiply create 32-bit stack", "Smoothed", "smooth_mask");
 selectWindow("Smoothed");
-run("Close")
+run("Close");
 
 imageCalculator("Add create 32-bit stack", "Result of signdist_smth-1", "Result of Smoothed");
+if(aniso_smth){
+	run("Gaussian Blur 3D...", "x=1 y=1 z=1");
+}
 saveAs("Tiff", path + "/signdist_smth.tif");
 selectWindow("Result of signdist_smth-1");
-run("Close")
+run("Close");
 selectWindow("Result of Smoothed");
-run("Close")
+run("Close");
