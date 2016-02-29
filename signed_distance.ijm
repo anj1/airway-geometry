@@ -1,3 +1,8 @@
+// Before running script:
+// 1. Load image stack.
+// 2. Make binary.
+// 3. Rename to 'avg'
+
 // settings.
 // use Plugins->Process->Exact Euclidean Distance Transform (3D)
 // instead of subtraction.
@@ -85,7 +90,7 @@ run("Close");
 
 imageCalculator("Add create 32-bit stack", "Result of signdist_smth-1", "Result of Smoothed");
 if(interp){
-	run("Size...", "width=600 height=800 depth=600 constrain average interpolation=Bilinear");
+	run("Size...", "width=600 height=800 depth=900 constrain average interpolation=Bilinear");
 }
 if(aniso_smth){
 	run("Gaussian Blur 3D...", "x=1 y=1 z=1");

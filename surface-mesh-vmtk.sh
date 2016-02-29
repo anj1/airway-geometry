@@ -11,7 +11,8 @@ in_file="signdist_smth.tif"
 #vmtksurfacereader -ifile /tmp/model.vtp --pipe vmtksurfacewriter -ofile /tmp/model.stl
 
 # updated script
-spacing="0.1 0.1 0.5125628140703586"
+#spacing="0.1 0.1 0.5125628140703586"
+spacing="0.1 0.1 0.1708542713567862"
 vmtkimagereader -spacing $spacing -ifile $in_file --pipe vmtkimagewriter.py -ofile /tmp/image_volume.vti
 vmtkmarchingcubes -l 0.0 -connectivity 1 -ifile /tmp/image_volume.vti -ofile /tmp/model.vtp
 vmtksurfacereader -ifile /tmp/model.vtp --pipe vmtksurfacewriter -ofile /tmp/model.stl
