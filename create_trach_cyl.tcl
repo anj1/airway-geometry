@@ -31,7 +31,7 @@ ic_delete_geometry point names {pnt.11 pnt.12} 0 1
 ic_move_geometry curve names crv.circ.trachea translate {0 -4.5 -30}
 
 # delete tracheal surface
-ic_delete_geometry surface names srf.inlet 0
+#ic_delete_geometry surface names srf.inlet 0
 
 # loft between trachea and circle
 ic_geo_cre_srf_loft_crvs INLET srf.loft.trachea 0.1 {crv.inlet crv.circ.trachea} 4 0 1
