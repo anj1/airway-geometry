@@ -1,6 +1,6 @@
 ic_undo_group_begin
 #set radius 4.741459155218981
-set radius 5.5
+set radius 6.5
 
 ic_geo_new_family INLET
 ic_boco_set_part_color INLET
@@ -10,13 +10,13 @@ ic_geo_modify_curve_reappr crv.inlet 0.1 0
 
 ic_set_global geo_cad 0.07 toler 
 
-ic_point crv_par INLET pnt.02 {topo_curve/8 0.0}  
+ic_point crv_par INLET pnt.02 {topo_curve/8 0.000}  
 ic_point crv_par INLET pnt.03 {topo_curve/8 0.125}  
-ic_point crv_par INLET pnt.05 {topo_curve/8 0.25}  
+ic_point crv_par INLET pnt.05 {topo_curve/8 0.250}  
 ic_point crv_par INLET pnt.06 {topo_curve/8 0.375}  
-ic_point crv_par INLET pnt.07 {topo_curve/8 0.5}  
+ic_point crv_par INLET pnt.07 {topo_curve/8 0.500}  
 ic_point crv_par INLET pnt.08 {topo_curve/8 0.625}  
-ic_point crv_par INLET pnt.09 {topo_curve/8 0.75}  
+ic_point crv_par INLET pnt.09 {topo_curve/8 0.750}  
 ic_point crv_par INLET pnt.10 {topo_curve/8 0.875} 
 
 ic_set_global geo_cad 0.07 toler   
@@ -36,7 +36,7 @@ ic_set_global geo_cad 0.08 toler
 ic_point {} INLET pnt.11 pnt.05+(pnt.09-pnt.05)*0.5      
 
 ic_set_global geo_cad 0.08 toler   
-ic_curve arc_ctr_rad INLET crv.01 {pnt.11 INLET.16 pnt.05 radius 0 360}   
+ic_curve arc_ctr_rad INLET crv.01 {pnt.11 pnt.02 pnt.05 radius 0 360}   
 ic_set_global geo_cad 0.08 toler  
 ic_move_geometry curve names crv.01 translate {0 -9 -60} 
 ic_geo_reset_data_structures  
