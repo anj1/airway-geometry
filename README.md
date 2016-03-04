@@ -2,8 +2,10 @@
 
 Scripts for processing human airway geometries for CFD simulation
 
-* **create\_trachea.tcl** : [ICEM](http://resource.ansys.com/Products/Other+Products/ANSYS+ICEM+CFD) script for attaching tracheal flow extension to mesh. To use, rename the curve around the tracheal opening to crv.inlet and its corresponding surface to srf.inlet; then run the script.
+* **extract\_topo.tcl** : [ICEM](http://resource.ansys.com/Products/Other+Products/ANSYS+ICEM+CFD) script for extracting useful topology (face curves, tracheal curve, etc.) from a input STL geometry.
+* **create\_trachea.tcl** : ICEM script for attaching tracheal flow extension to mesh. To use, rename the curve around the tracheal opening to crv.inlet and its corresponding surface to srf.inlet; then run the script.
 * **create\_trach\_cyl.tcl** : ICEM script for attaching tracheal flow extension with circular cross-section to mesh. To use, rename the curve around the tracheal opening to crv.inlet and its corresponding surface to srf.inlet; then run the script.
+* **create\_trach\_smth.tcl** : ICEM script for attaching a tracheal flow extension. Use after using extract_topo.tcl. The major difference with the above script is that the attached flow extension has a smoother transition.
 * **surf\_from\_pts.tcl** : ICEM script for creating an extended box around the face. To use, rename the curves around the face crv.face.1, ... , crv.face.2 (in counter-clockwise order from the perspective of the face) and the points pnt.1, ... , pnt.4 in top->bottom, right->left order.
 * **triangle-io.jl** : [Julia](http://julialang.org/) functions for loading and saving in Jonathan Shewchuk's [Triangle](https://www.cs.cmu.edu/~quake/triangle.html) format.
 * **remove-dup.xml** : [MeshLab](http://meshlab.sourceforge.net/) filter script for removing duplicate vertices (useful on output of mesh-plane-cut.jl)
