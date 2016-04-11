@@ -10,14 +10,14 @@ ic_geo_modify_curve_reappr crv.inlet 0.1 0
 
 ic_set_global geo_cad 0.07 toler 
 
-ic_point crv_par INLET pnt.02 {topo_curve/8 0.000}  
-ic_point crv_par INLET pnt.03 {topo_curve/8 0.125}  
-ic_point crv_par INLET pnt.05 {topo_curve/8 0.250}  
-ic_point crv_par INLET pnt.06 {topo_curve/8 0.375}  
-ic_point crv_par INLET pnt.07 {topo_curve/8 0.500}  
-ic_point crv_par INLET pnt.08 {topo_curve/8 0.625}  
-ic_point crv_par INLET pnt.09 {topo_curve/8 0.750}  
-ic_point crv_par INLET pnt.10 {topo_curve/8 0.875} 
+ic_point crv_par INLET pnt.02 {topo_curve/1 0.000}  
+ic_point crv_par INLET pnt.03 {topo_curve/1 0.125}  
+ic_point crv_par INLET pnt.05 {topo_curve/1 0.250}  
+ic_point crv_par INLET pnt.06 {topo_curve/1 0.375}  
+ic_point crv_par INLET pnt.07 {topo_curve/1 0.500}  
+ic_point crv_par INLET pnt.08 {topo_curve/1 0.625}  
+ic_point crv_par INLET pnt.09 {topo_curve/1 0.750}  
+ic_point crv_par INLET pnt.10 {topo_curve/1 0.875} 
 
 ic_set_global geo_cad 0.07 toler   
 #ic_delete_geometry curve names crv.00 0
@@ -28,7 +28,7 @@ ic_geo_reset_data_structures
 
 ic_geo_configure_one_attribute surface shade wire
 ic_set_global geo_cad 0.08 toler 
-ic_geo_cre_srf_loft_crvs INLET srf.00 0.1 {topo_curve/8 crv.00} 4 0 1
+ic_geo_cre_srf_loft_crvs INLET srf.00 0.1 {topo_curve/1 crv.00} 4 0 1
 ic_set_global geo_cad 0.08 toler
 ic_set_dormant_pickable point 0 {}
 ic_set_dormant_pickable curve 0 {} 
