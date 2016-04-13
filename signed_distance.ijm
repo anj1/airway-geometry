@@ -16,6 +16,8 @@ aniso_smth=true;
 pre_smth=false;
 // Interpolate?
 interp=true;
+// Smooth trachea?
+smooth_trachea=true;
 
 path = getDirectory("Choose the folder for output.");
 runMacro(path + "/smooth_mask.ijm");
@@ -94,6 +96,9 @@ if(interp){
 }
 if(aniso_smth){
 	run("Gaussian Blur 3D...", "x=1 y=1 z=1");
+}
+if(smooth_trachea){
+	runMacro(path + "/smooth_trachea.ijm");
 }
 saveAs("Tiff", path + "/signdist_smth.tif");
 selectWindow("Result of signdist_smth-1");
