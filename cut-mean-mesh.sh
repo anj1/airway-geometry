@@ -12,7 +12,7 @@ meshlabserver -i $1 -o mm-solid-cut0.off
 
 # front, inlet, top, bottom, side1, side2
 ~/src/julia-0.4/julia mesh-cut-plane.jl  0.0  -1.0    0.0  50.0  false mm-solid-cut0.off mm-solid-cut1.off
-~/src/julia-0.4/julia mesh-cut-plane.jl  0.0   0.15   1.0  32.0  false mm-solid-cut1.off mm-solid-cut2.off
+~/src/julia-0.4/julia mesh-cut-plane.jl  0.0   0.15   1.0  35.0  false mm-solid-cut1.off mm-solid-cut2.off
 ~/src/julia-0.4/julia mesh-cut-plane.jl  0.0  -0.2   -1.0  48.0  false mm-solid-cut2.off mm-solid-cut3.off
 ~/src/julia-0.4/julia mesh-cut-plane.jl  0.0  -0.2    1.0  14.0  false mm-solid-cut3.off mm-solid-cut4.off
 ~/src/julia-0.4/julia mesh-cut-plane.jl -1.0  -0.001  0.0  28.1  true mm-solid-cut4.off mm-solid-cut5.off
