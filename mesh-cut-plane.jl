@@ -1,9 +1,10 @@
 # cut a mesh at a plane.
 
 if length(ARGS)<7
-  println("Usage: mesh-cut-plane <a> <b> <c> <d> <flipfaces=true|false> <input.off> <output.off>")
+  println("Usage: mesh-cut-plane <a> <b> <c> <d> <flipfaces=true|false> <offset> <input.off> <output.off>")
 	println("where a,b,c,d define the linear equation corresponding to the plane:")
 	println("ax + by + cz + d = 0")
+	println("And offset is the +/- offset to the final plane.")
 	exit()
 end
 
@@ -12,10 +13,11 @@ pln_b = parse(Float64, ARGS[2])
 pln_c = parse(Float64, ARGS[3])
 pln_d = parse(Float64, ARGS[4])
 flipf = convert(Bool, parse(ARGS[5]))
-infile = ARGS[6]
-outfile = ARGS[7]
+plnofs= parse(Float64, ARGS[6])
+infile = ARGS[7]
+outfile = ARGS[8]
 
-println("$(pln_a)x + $(pln_b)y + $(pln_c)z + $pln_d = 0")
+println("$(pln_a)x + $(pln_b)y + $(pln_c)z + $pln_d = 0; offset = $(plnofs)")
 
 # compute plane transformation
 v = [pln_a,pln_b,pln_c]
@@ -178,7 +180,7 @@ n_verts = length(verts)
 append!(verts, [Vector3(v[1],v[2],0.0) for v in slice_verts])
 flipz = flipz $ flipf
 if flipz
-  append!(new_faces, Face{3,Int64,0}[Face(f[1]+n_verts,f[2]+n_verts,f[3]+n_verts) for f in slice_faces])
+	append!(new_faces, Face{3,Int64,0}[Face(f[1]+n_verts,f[2]+n_verts,f[3]+n_verts) for f in slice_faces])
 else
 	append!(new_faces, Face{3,Int64,0}[Face(f[3]+n_verts,f[2]+n_verts,f[1]+n_verts) for f in slice_faces])
 end
@@ -197,6 +199,14 @@ new_new_faces = Face{3,Int64,0}[update_face(tri, newidx) for tri in new_faces]
 
 # remove duplicate vertices
 # TODO
+
+# add offset
+for i in 1:length(new_verts)
+ 	v = new_verts[i]
+ 	if abs(v[3])<1e-6
+ 		new_verts[i] = Vector3(v[1],v[2],plnofs)
+ 	end
+end
 
 # write output
 qinv = Matrix3x3(inv(q))
