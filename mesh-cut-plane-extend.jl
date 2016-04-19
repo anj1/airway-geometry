@@ -140,33 +140,6 @@ function add_tri_above_plane!(faces, verts, tri::Face{3,Int64,0})
 	end
 end
 
-
-function find_slice_triangulation!(verts, new_faces, edg_v_list, edg_list, flipz)
-	# use Triangle to find triangulation of slice
-	write_poly(verts, edg_v_list, edg_list, "/tmp/out.poly")
-	run(`triangle -Q -p -a$max_area /tmp/out.poly`)
-	rm("/tmp/out.poly")
-
-	#slice_faces = read_slice_faces("/tmp/out.1.ele", edg_v_list)
-	#append!(new_faces, slice_faces)
-
-	new_faces = Face{3,Int64,0}[]
-
-	slice_verts = read_node("/tmp/out.1.node")
-	slice_faces = read_ele( "/tmp/out.1.ele")
-	n_verts = length(verts)
-	append!(verts, [Vector3(v[1],v[2],0.0) for v in slice_verts])
-	if flipz
-		append!(new_faces, Face{3,Int64,0}[Face(f[1]+n_verts,f[2]+n_verts,f[3]+n_verts) for f in slice_faces])
-	else
-		append!(new_faces, Face{3,Int64,0}[Face(f[3]+n_verts,f[2]+n_verts,f[1]+n_verts) for f in slice_faces])
-	end
-
-	rm("/tmp/out.1.ele")
-	rm("/tmp/out.1.node")
-	rm("/tmp/out.1.poly")
-end
-
 # given an edge (preferably on z=0), it extends
 # the edge to a triangle fan
 # extend: amount to extend
@@ -247,19 +220,52 @@ v_edges = [(verts[e[1]],verts[e[2]]) for e in edg_list]
 
 # compute max area (for quality generation)
 # TODO
-#max_area = 0.0005
-max_area = 1.0
+max_area = 0.05
+#max_area = 1.0
 
+# verts: the existing vertex list, for invoking triangle
+# new_verts: new vertices, is modified.
+# new_faces: new faces, is modified.
+function find_slice_triangulation!(verts, edg_v_list, edg_list, flipz, plnoffs)
+	# use Triangle to find triangulation of slice
+	write_poly(verts, edg_v_list, edg_list, "/tmp/out.poly")
+	run(`triangle -Q -p -a$max_area /tmp/out.poly`)
+	rm("/tmp/out.poly")
 
-local ext_faces
-local ext_verts
-if save_ext_seperately
+	#slice_faces = read_slice_faces("/tmp/out.1.ele", edg_v_list)
+	#append!(new_faces, slice_faces)
+
 	ext_faces = Face{3,Int64,0}[]
 	ext_verts = Vector3{Float64}[]
-	find_slice_triangulation(ext_verts, ext_faces, edg_v_list, edg_list, flipz $ flipf)
-else
-	find_slice_triangulation(verts, new_faces, edg_v_list, edg_list, flipz $ flipf)
+
+	slice_verts = read_node("/tmp/out.1.node")
+	slice_faces = read_ele( "/tmp/out.1.ele")
+	n_verts = length(ext_verts)
+	append!(ext_verts, [Vector3(v[1],v[2],plnofs) for v in slice_verts])
+	if flipz
+		append!(ext_faces, Face{3,Int64,0}[Face(f[1]+n_verts,f[2]+n_verts,f[3]+n_verts) for f in slice_faces])
+	else
+		append!(ext_faces, Face{3,Int64,0}[Face(f[3]+n_verts,f[2]+n_verts,f[1]+n_verts) for f in slice_faces])
+	end
+
+	rm("/tmp/out.1.ele")
+	rm("/tmp/out.1.node")
+	rm("/tmp/out.1.poly")
+	ext_verts, ext_faces
 end
+
+n_segs = 32
+ext_verts, ext_faces = find_slice_triangulation!(verts, edg_v_list, edg_list, flipz $ flipf, plnofs)
+extend_edge!(ext_faces, ext_verts, v_edges, plnofs, n_segs)
+
+#local ext_faces
+#local ext_verts
+#if save_ext_seperately
+
+#else
+#	find_slice_triangulation!(verts, verts, new_faces, edg_v_list, edg_list, flipz $ flipf, plnofs)
+#end
+
 
 # remove unused vertices
 new_verts = filter(v -> v[3] >= 0.0, verts)
@@ -268,6 +274,14 @@ function update_face(tri, newidx)
 	Face(newidx[tri[1]], newidx[tri[2]], newidx[tri[3]])
 end
 new_new_faces = Face{3,Int64,0}[update_face(tri, newidx) for tri in new_faces]
+
+
+if !save_ext_seperately
+	l = length(new_verts)
+	new_verts = vcat(new_verts, ext_verts)
+	ext_faces = Face{3,Int64,0}[Face(f[1]+l,f[2]+l,f[3]+l) for f in ext_faces]
+	new_new_faces = vcat(new_new_faces, ext_faces)
+end
 
 # remove duplicate vertices
 # TODO
@@ -280,12 +294,7 @@ new_new_faces = Face{3,Int64,0}[update_face(tri, newidx) for tri in new_faces]
 #  	end
 # end
 
-n_segs = 10
-if save_ext_seperately
-	extend_edge!(ext_faces, ext_verts, v_edges, plnofs, n_segs)
-else
-	extend_edge!(new_new_faces, new_verts, v_edges, plnofs, n_segs)
-end
+#@show length(ext_faces), length(new_faces), length
 
 # write output
 qinv = Matrix3x3(inv(q))
