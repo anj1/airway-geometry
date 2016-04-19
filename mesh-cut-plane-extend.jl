@@ -1,7 +1,7 @@
 # cut a mesh at a plane.
 
 if length(ARGS)<7
-  println("Usage: mesh-cut-plane <a> <b> <c> <d> <flipfaces=true|false> <input.off> <output.off>")
+  println("Usage: mesh-cut-plane <a> <b> <c> <d> <flipfaces=true|false> <offset> <input.off> <output.off>")
 	println("where a,b,c,d define the linear equation corresponding to the plane:")
 	println("ax + by + cz + d = 0")
 	println("And offset is the +/- offset to the final plane.")
@@ -13,10 +13,11 @@ pln_b = parse(Float64, ARGS[2])
 pln_c = parse(Float64, ARGS[3])
 pln_d = parse(Float64, ARGS[4])
 flipf = convert(Bool, parse(ARGS[5]))
-infile = ARGS[6]
-outfile = ARGS[7]
+plnofs= parse(Float64, ARGS[6])
+infile = ARGS[7]
+outfile = ARGS[8]
 
-println("$(pln_a)x + $(pln_b)y + $(pln_c)z + $pln_d = 0")
+println("$(pln_a)x + $(pln_b)y + $(pln_c)z + $pln_d = 0; offset = $(plnofs)")
 
 # compute plane transformation
 v = [pln_a,pln_b,pln_c]
@@ -56,6 +57,8 @@ function tri_plane_cut!{T}(verts::Array{Vtx{T}}, n_orig_vert, i1, i2, i3)
 	      lin_plane_intrsct(verts[i1], verts[i2]),
 	      lin_plane_intrsct(verts[i2], verts[i3]),
 		  lin_plane_intrsct(verts[i3], verts[i1])]
+
+	#@show it
 
 	# add intersection point with default idx fallback;
 	# that is, if crd==nothing (no intersection point)
@@ -132,12 +135,51 @@ function add_tri_above_plane!(faces, verts, tri::Face{3,Int64,0})
 	end
 end
 
+# given an edge (preferably on z=0), it extends
+# the edge to a triangle fan
+# extend: amount to extend
+# segs: number of segments
+function extend_edge!(faces, verts, v_edge, extend, segs)
+	offs = (extend/segs)
+	for e in v_edge
+		l = length(verts)
+
+		v1 = e[1]
+		v2 = e[2]
+		# if (v1[3] < -1e-5) || (v2[3] < -1e-5)
+		# 	continue;
+		# end
+		push!(verts,v1)
+		push!(verts,v2)
+
+		for i = 1:segs
+			# create frame for our segment
+			w1 = v1+Vector3([0,0,offs])
+			w2 = v2+Vector3([0,0,offs])
+
+			# add vertices
+			push!(verts,w1)
+			push!(verts,w2)
+
+			# add two faces
+			push!(faces,Face(l+1,l+2,l+4))
+			push!(faces,Face(l+1,l+4,l+3))
+
+			# ready for next segment
+			v1 = w1
+			v2 = w2
+			l += 2
+		end
+	end
+end
+
 # add new vertices;
 # and create a new list of faces such that all are above the plane.
 n_orig_vert = length(verts)
 new_faces = Face{3,Int64,0}[]
 edg_v_list = Int64[]
 edg_list = Face{2,Int64,0}[]
+v_edges = Tuple{Vector3{Float64},Vector3{Float64}}[]
 for tri in faces
 	l = tri_location_plane(verts, tri)
 	if l==0
@@ -149,9 +191,17 @@ for tri in faces
 		add_tri_above_plane!(new_faces, verts, Face(itdx[2],  tri[3], itdx[3]))
 		add_tri_above_plane!(new_faces, verts, Face(itdx[1], itdx[2], itdx[3]))
 
-		push!(edg_v_list, itdx[o_edge[1]])
-		push!(edg_v_list, itdx[o_edge[2]])
-		push!(edg_list, Face(itdx[o_edge[1]], itdx[o_edge[2]]))
+
+
+		ei1 = itdx[o_edge[1]]
+		ei2 = itdx[o_edge[2]]
+		push!(edg_v_list, ei1)
+		push!(edg_v_list, ei2)
+		#println(verts[ei1])
+		#println(verts[ei2])
+		#println("\r\n")
+		#push!(v_edges, (verts[ei1],verts[ei2]))
+		push!(edg_list, Face(ei1, ei2))
 	elseif l==1
 		push!(new_faces, tri)
 	end
@@ -159,6 +209,9 @@ end
 
 # remove duplicates in edg_v_list
 edg_v_list = unique(edg_v_list)
+
+# save vertex coords (not indices) of edge list
+v_edges = [(verts[e[1]],verts[e[2]]) for e in edg_list]
 
 # compute max area (for quality generation)
 # TODO
@@ -198,6 +251,16 @@ new_new_faces = Face{3,Int64,0}[update_face(tri, newidx) for tri in new_faces]
 
 # remove duplicate vertices
 # TODO
+
+# add offset
+# for i in 1:length(new_verts)
+#  	v = new_verts[i]
+#  	if abs(v[3])<1e-6
+#  		new_verts[i] = Vector3(v[1],v[2],plnofs)
+#  	end
+# end
+
+extend_edge!(new_new_faces, new_verts, v_edges, plnofs, 10)
 
 # write output
 qinv = Matrix3x3(inv(q))

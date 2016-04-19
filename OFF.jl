@@ -6,7 +6,8 @@ function read_OFF(filename)
 	f = open(filename,"r")
 
 	# make sure it's an OFF file
-	assert(readline(f) == "OFF\n")
+	m = readline(f)
+	assert((m == "OFF\r\n") || (m == "OFF\n"))
 
 	# read number of vertices, faces, and edges
 	nvert, nface, nedge=vec(eval(parse("[" * readline(f) * "]")))
