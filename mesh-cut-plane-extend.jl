@@ -1,10 +1,11 @@
 # cut a mesh at a plane.
 
 if length(ARGS)<7
-  println("Usage: mesh-cut-plane <a> <b> <c> <d> <flipfaces=true|false> <offset> <input.off> <output.off>")
+  println("Usage: mesh-cut-plane <a> <b> <c> <d> <flipfaces=true|false> <offset> <in.off> <out.off> <ext.off>")
 	println("where a,b,c,d define the linear equation corresponding to the plane:")
 	println("ax + by + cz + d = 0")
 	println("And offset is the +/- offset to the final plane.")
+	println("If 'ext.off' is given, it's where the flow extension mesh is separately saved.")
 	exit()
 end
 
@@ -16,7 +17,11 @@ flipf = convert(Bool, parse(ARGS[5]))
 plnofs= parse(Float64, ARGS[6])
 infile = ARGS[7]
 outfile = ARGS[8]
-
+save_ext_seperately = false
+if length(ARGS)>8
+	extfile = ARGS[9]
+	save_ext_seperately = true
+end
 println("$(pln_a)x + $(pln_b)y + $(pln_c)z + $pln_d = 0; offset = $(plnofs)")
 
 # compute plane transformation
@@ -135,6 +140,33 @@ function add_tri_above_plane!(faces, verts, tri::Face{3,Int64,0})
 	end
 end
 
+
+function find_slice_triangulation!(verts, new_faces, edg_v_list, edg_list, flipz)
+	# use Triangle to find triangulation of slice
+	write_poly(verts, edg_v_list, edg_list, "/tmp/out.poly")
+	run(`triangle -Q -p -a$max_area /tmp/out.poly`)
+	rm("/tmp/out.poly")
+
+	#slice_faces = read_slice_faces("/tmp/out.1.ele", edg_v_list)
+	#append!(new_faces, slice_faces)
+
+	new_faces = Face{3,Int64,0}[]
+
+	slice_verts = read_node("/tmp/out.1.node")
+	slice_faces = read_ele( "/tmp/out.1.ele")
+	n_verts = length(verts)
+	append!(verts, [Vector3(v[1],v[2],0.0) for v in slice_verts])
+	if flipz
+		append!(new_faces, Face{3,Int64,0}[Face(f[1]+n_verts,f[2]+n_verts,f[3]+n_verts) for f in slice_faces])
+	else
+		append!(new_faces, Face{3,Int64,0}[Face(f[3]+n_verts,f[2]+n_verts,f[1]+n_verts) for f in slice_faces])
+	end
+
+	rm("/tmp/out.1.ele")
+	rm("/tmp/out.1.node")
+	rm("/tmp/out.1.poly")
+end
+
 # given an edge (preferably on z=0), it extends
 # the edge to a triangle fan
 # extend: amount to extend
@@ -218,28 +250,16 @@ v_edges = [(verts[e[1]],verts[e[2]]) for e in edg_list]
 #max_area = 0.0005
 max_area = 1.0
 
-# use Triangle to find triangulation of slice
-write_poly(verts, edg_v_list, edg_list, "/tmp/out.poly")
-run(`triangle -Q -p -a$max_area /tmp/out.poly`)
-rm("/tmp/out.poly")
 
-#slice_faces = read_slice_faces("/tmp/out.1.ele", edg_v_list)
-#append!(new_faces, slice_faces)
-
-slice_verts = read_node("/tmp/out.1.node")
-slice_faces = read_ele( "/tmp/out.1.ele")
-n_verts = length(verts)
-append!(verts, [Vector3(v[1],v[2],0.0) for v in slice_verts])
-flipz = flipz $ flipf
-if flipz
-	append!(new_faces, Face{3,Int64,0}[Face(f[1]+n_verts,f[2]+n_verts,f[3]+n_verts) for f in slice_faces])
+local ext_faces
+local ext_verts
+if save_ext_seperately
+	ext_faces = Face{3,Int64,0}[]
+	ext_verts = Vector3{Float64}[]
+	find_slice_triangulation(ext_verts, ext_faces, edg_v_list, edg_list, flipz $ flipf)
 else
-	append!(new_faces, Face{3,Int64,0}[Face(f[3]+n_verts,f[2]+n_verts,f[1]+n_verts) for f in slice_faces])
+	find_slice_triangulation(verts, new_faces, edg_v_list, edg_list, flipz $ flipf)
 end
-
-rm("/tmp/out.1.ele")
-rm("/tmp/out.1.node")
-rm("/tmp/out.1.poly")
 
 # remove unused vertices
 new_verts = filter(v -> v[3] >= 0.0, verts)
@@ -260,10 +280,19 @@ new_new_faces = Face{3,Int64,0}[update_face(tri, newidx) for tri in new_faces]
 #  	end
 # end
 
-extend_edge!(new_new_faces, new_verts, v_edges, plnofs, 10)
+n_segs = 10
+if save_ext_seperately
+	extend_edge!(ext_faces, ext_verts, v_edges, plnofs, n_segs)
+else
+	extend_edge!(new_new_faces, new_verts, v_edges, plnofs, n_segs)
+end
 
 # write output
 qinv = Matrix3x3(inv(q))
 new_verts = Vtx{Float64}[(qinv*v)+u0 for v in new_verts]
 writeOFF(outfile, new_verts, new_new_faces)
+if save_ext_seperately
+	ext_verts = Vtx{Float64}[(qinv*v)+u0 for v in ext_verts]
+	writeOFF(extfile, ext_verts, ext_faces)
+end
 
