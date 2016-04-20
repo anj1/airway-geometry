@@ -126,7 +126,7 @@ function tri_location_plane(verts, tri::Face{3,Int64,0})
 	num = (verts[tri[1]][3] >= 0.0) +
           (verts[tri[2]][3] >= 0.0) +
           (verts[tri[3]][3] >= 0.0)
-    round(Int64,(num/1.5)-1)
+    round(Int64,(num/1.5)-1), num
 end
 
 # add a triangle to the list if it is above the z=0 plane
@@ -186,7 +186,7 @@ edg_v_list = Int64[]
 edg_list = Face{2,Int64,0}[]
 v_edges = Tuple{Vector3{Float64},Vector3{Float64}}[]
 for tri in faces
-	l = tri_location_plane(verts, tri)
+	l, ch = tri_location_plane(verts, tri)
 	if l==0
 		itdx = zeros(Int64,3)
 		itdx[1],itdx[2],itdx[3],o_edge = tri_plane_cut!(verts, n_orig_vert, tri[1], tri[2], tri[3])
@@ -196,10 +196,14 @@ for tri in faces
 		add_tri_above_plane!(new_faces, verts, Face(itdx[2],  tri[3], itdx[3]))
 		add_tri_above_plane!(new_faces, verts, Face(itdx[1], itdx[2], itdx[3]))
 
+		if ch==1
+			ei1 = itdx[o_edge[1]]
+			ei2 = itdx[o_edge[2]]
+		elseif ch==2
+			ei2 = itdx[o_edge[1]]
+			ei1 = itdx[o_edge[2]]
+		end
 
-
-		ei1 = itdx[o_edge[1]]
-		ei2 = itdx[o_edge[2]]
 		push!(edg_v_list, ei1)
 		push!(edg_v_list, ei2)
 		#println(verts[ei1])
