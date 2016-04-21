@@ -1,0 +1,8 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+ <filter name="Small component selection">
+  <Param tooltip="" description="Small component ratio" type="RichFloat" value="0.1" name="NbFaceRatio"/>
+  <Param tooltip="" description="Select only non closed components" type="RichBool" value="false" name="NonClosedOnly"/>
+ </filter>
+ <filter name="Delete Selected Faces and Vertices"/>
+</FilterScript>

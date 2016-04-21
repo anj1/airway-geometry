@@ -27,7 +27,8 @@ rm mm-solid-cut4.off
 rm mm-solid-cut5.off
 
 # remove duplicated vertices and save as STL
-meshlabserver -i mm-solid-cut.off -o $2 -s remove-dup.xml
-meshlabserver -i mm-solid-ext.off -o $3 -s remove-dup.xml
+meshlabserver -i mm-solid-cut.off -o $2 -s remove-smallcomp.xml
+meshlabserver -i mm-solid-ext.off -o mm-solid-ext.off -s remove-dup.xml
+meshlabserver -i mm-solid-ext.off -o $3 -s remove-smallcomp.xml
 rm mm-solid-cut.off
 rm mm-solid-ext.off

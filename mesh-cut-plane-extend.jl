@@ -135,7 +135,7 @@ function add_tri_above_plane!(faces, verts, tri::Face{3,Int64,0})
 	if (tri[1]==tri[2]) || (tri[2]==tri[3]) || (tri[3]==tri[1])
 		return
 	end
-	if tri_location_plane(verts, tri)==1
+	if tri_location_plane(verts, tri)[1]==1
 		push!(faces, tri)
 	end
 end
@@ -199,9 +199,9 @@ for tri in faces
 		if ch==1
 			ei1 = itdx[o_edge[1]]
 			ei2 = itdx[o_edge[2]]
-		elseif ch==2
-			ei2 = itdx[o_edge[1]]
+		else
 			ei1 = itdx[o_edge[2]]
+			ei2 = itdx[o_edge[1]]
 		end
 
 		push!(edg_v_list, ei1)
@@ -261,14 +261,6 @@ end
 n_segs = 32
 ext_verts, ext_faces = find_slice_triangulation!(verts, edg_v_list, edg_list, flipz $ flipf, plnofs)
 extend_edge!(ext_faces, ext_verts, v_edges, plnofs, n_segs)
-
-#local ext_faces
-#local ext_verts
-#if save_ext_seperately
-
-#else
-#	find_slice_triangulation!(verts, verts, new_faces, edg_v_list, edg_list, flipz $ flipf, plnofs)
-#end
 
 
 # remove unused vertices
