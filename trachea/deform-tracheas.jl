@@ -1,22 +1,27 @@
-
-using PyPlot
+#using PyPlot
+using DataFrames
 using ImmutableArrays
-using Images
+#using Meshes
+using ThinPlateSplines
+using JLD
+import Images:imfilter_gaussian 
 
 push!(LOAD_PATH,".")
 include("CurveFraming.jl")
 include("PiecewiseLinear.jl")
 using CurveFraming
 using PiecewiseLinear
+include("../OFF.jl")
 
-# load all paths and compute average
-	# vert = Vector3{Float64}[Vector3(randn(3)) for i=1:40]
-	# nois = Vector3{Float64}[Vector3(0.1*randn(3)) for i=1:40]
-	# v = cumsum(vert).+nois
-	# v = map(x -> x/norm(x), v)
+# Parameters
 
-	# startp = cumsum(v)
-
+trach_path = "/home/anej001/airways/scans/tracheas"
+nrml = Vector3([1.0,0.0,1.0])
+min_n_ctrlpts = 5
+sig = 5.0
+charlen = 20.0
+extrude = 0.01
+lambda = 1.0
 
 
 # smooth a curve
@@ -77,14 +82,26 @@ end
 # charlen: characteristic length between control points
 # min_n_ctrlpts: reject any curves that have less than this
 #   number of control points.
-function congeal_curves{T}(v::Array{Vector{Vector3{T}}},nrml,min_n_ctrlpts,sig,charlen,extrude)
+function congeal_curves{T}(v::Array{Vector{Vector3{T}}},trach_files,nrml,min_n_ctrlpts,sig,charlen,extrude)
 	n_curves = length(v)
 	
 	# downsample all curves
 	downsampled_v = Vector{Vector3{T}}[downsample_curve_arclength(c,sig,charlen) for c in v]
 	
 	# reject
-	filter!(x -> length(x)>min_n_ctrlpts, downsampled_v)
+	#for i=1:length(downsampled_v)
+	i=1
+	while i<=length(downsampled_v)
+		x = downsampled_v[i]
+		if length(x) <= min_n_ctrlpts
+		#@show "deleted"
+			deleteat!(trach_files, i)
+			deleteat!(downsampled_v, i)
+		else
+			i+=1
+		end
+	end
+	#filter!(x -> length(x)>min_n_ctrlpts, downsampled_v)
 	
 	# obtain *actual* minimum control points
 	min_n_ctrlpts = minimum(map(length, downsampled_v))
@@ -99,5 +116,32 @@ function congeal_curves{T}(v::Array{Vector{Vector3{T}}},nrml,min_n_ctrlpts,sig,c
 	ctrlpts_v = Matrix{T}[curve_to_tps_ctrlpts(x,nrml,extrude) for x in downsampled_v]
 	ctrlpts_mean = curve_to_tps_ctrlpts(mean_v, nrml, extrude)
 
-	return (ctrlpts_v, ctrlpts_mean)
+	return (ctrlpts_v, ctrlpts_mean, trach_files)
+end
+
+function read_coords_from_file(fname)
+	tabl = readtable(fname,separator=' ')
+	x = tabl[:,:X]
+	y = tabl[:,:Y]
+	z = tabl[:,:Z]
+	Vector3{Float64}[Vector3(x[i],y[i],z[i]) for i=1:length(x)]
+end
+
+trach_files = filter(x -> splitext(x)[2]==".dat", readdir(trach_path))
+
+println("Loading coordinates.")
+v = Vector{Vector3{Float64}}[]
+for f in trach_files
+	push!(v, read_coords_from_file(joinpath(trach_path,f)))
+end
+
+println("Obtaining mean curve.")
+ctrlpts_v, ctrlpts_mean, trach_files = congeal_curves(v, trach_files, nrml, min_n_ctrlpts, sig, charlen, extrude)
+println("Number of control points: ", size(ctrlpts_mean,1))
+
+println("Writing out deformations.")
+for i = 1:length(trach_files)
+	jf = splitext(trach_files[i])[1] * ".jld"
+	tps = tps_solve(ctrlpts_v[i], ctrlpts_mean, lambda)
+	save(joinpath(trach_path,jf),"tps",tps)
 end
