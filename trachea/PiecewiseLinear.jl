@@ -9,6 +9,7 @@ export PiecewiseLinearCurve3D, curv_length, evaluate
 
 using ImmutableArrays
 using Dierckx
+include("vec3-util.jl")
 
 # return the cumulative distance over a path
 function arc_distance(vert)
@@ -34,7 +35,8 @@ curv_length(curv::PiecewiseLinearCurve3D) = curv.t[end]
 # create a piecewise-linear continuous curve from a set of vertices.
 function PiecewiseLinearCurve3D{T}(vert::Array{Vector3{T}})
 	t = arc_distance(vert)
-	cs = reshape(reinterpret(T,vert),3,length(vert))
+	#cs = reshape(reinterpret(T,vert),3,length(vert))
+	cs = convert(Matrix{T}, vert)
 	x = Spline1D(t, vec(cs[1,:]), k=1) # k=1 makes it linear
 	y = Spline1D(t, vec(cs[2,:]), k=1)
 	z = Spline1D(t, vec(cs[3,:]), k=1)

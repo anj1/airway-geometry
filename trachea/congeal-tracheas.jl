@@ -7,11 +7,11 @@ using JLD
 import Images:imfilter_gaussian 
 
 push!(LOAD_PATH,".")
+include("vec3-util.jl")
 include("CurveFraming.jl")
 include("PiecewiseLinear.jl")
 using CurveFraming
 using PiecewiseLinear
-include("../OFF.jl")
 
 # Parameters
 
@@ -27,9 +27,9 @@ lambda = 1.0
 # smooth a curve
 function filter_curve_gaussian{T}(vert::Array{Vector3{T}},sig)
 	N = length(vert)
-	cs = reshape(reinterpret(T,vert),3,N)
+	cs = convert(Matrix{T}, vert) #reshape(reinterpret(T,vert),3,N)
 	cs = Images.imfilter_gaussian(cs,[0.0,sig])
-	reinterpret(Vector3{T},cs,(N,))
+	convert(Vector{Vector3{T}}, cs)  #reinterpret(Vector3{T},cs,(N,))
 end
 
 # downsample a curve (and smooth it first)
@@ -64,7 +64,8 @@ function curve_to_tps_ctrlpts{T}(vert::Array{Vector3{T}},frm::Vector{Matrix3x3{T
 	end
 	push!(tps_ctrlpts, vert[end])
 	# reshape, transpose, and return
-	return reshape(reinterpret(T,tps_ctrlpts),3,length(tps_ctrlpts))'
+	#return reshape(reinterpret(T,tps_ctrlpts),3,length(tps_ctrlpts))'
+	return convert(Matrix{T}, tps_ctrlpts)'
 end
 
 function curve_to_tps_ctrlpts{T}(vert::Vector{Vector3{T}},nrml::Vector3{T},extrude)
