@@ -16,13 +16,13 @@ using PiecewiseLinear
 # Parameters
 
 trach_path = "/home/anej001/airways/scans/tracheas"
-nrml = Vector3([1.0,0.0,1.0])
+nrml = Vector3([1.0,0.0,0.0])
 min_n_ctrlpts = 5
 sig = 5.0
 charlen = 20.0
-extrude = 0.01
+extrude = 0.1
 lambda = 1.0
-
+curvebase = Vector3([0., 1., 1]) # dx for extra point added to base of curves
 
 # smooth a curve
 function filter_curve_gaussian{T}(vert::Array{Vector3{T}},sig)
@@ -56,6 +56,7 @@ function curve_to_tps_ctrlpts{T}(vert::Array{Vector3{T}},frm::Vector{Matrix3x3{T
 	tps_ctrlpts = Vector3{T}[]
 	for i = 1:length(frm)
 		# c1 is tangent; c2 and c3 are normal/binormal
+		#@show norm(frm[i].c2), norm(frm[i].c3)
 		push!(tps_ctrlpts, vert[i])
 		push!(tps_ctrlpts, vert[i] - extrude*frm[i].c2)
 		push!(tps_ctrlpts, vert[i] + extrude*frm[i].c2)
@@ -102,7 +103,12 @@ function congeal_curves{T}(v::Array{Vector{Vector3{T}}},trach_files,nrml,min_n_c
 			i+=1
 		end
 	end
-	#filter!(x -> length(x)>min_n_ctrlpts, downsampled_v)
+	
+	# re-base the control points
+	for i = 1:length(downsampled_v)
+		unshift!(downsampled_v[i], downsampled_v[i][1]+curvebase)
+	end
+
 	
 	# obtain *actual* minimum control points
 	min_n_ctrlpts = minimum(map(length, downsampled_v))

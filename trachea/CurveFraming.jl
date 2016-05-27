@@ -91,9 +91,12 @@ nullspace(v::Vector3) = nullspace(convert(Array, v)')
 function frame_curve_parallel{T}(vert::Vector{Vector3{T}},n::Vector3{T})
 	# compute tangents along curve
 	tangnt = tangents(vert)
-	
+
 	# the rest of the normals
 	normal = parallel_transport_normal(tangnt, n)
+
+	#@show norm(normal[1]), norm(tangnt[1]), dot(normal[2],tangnt[1])
+	#@show norm(normal[2]), norm(tangnt[2]), dot(normal[1],tangnt[2])
 
 	# ... and the rest of the binormals
 	binorm = Vector3{T}[normal[i]×tangnt[i] for i=1:length(normal)]

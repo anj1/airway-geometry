@@ -3,7 +3,7 @@
 using ImmutableArrays
 using Meshes
 
-include("OFF.jl")
+include("../OFF.jl")
 
 if length(ARGS) < 3
 	println("Usage: align_to_landmarks.jl <mesh.off> <output.off> <landmark file.csv>")
