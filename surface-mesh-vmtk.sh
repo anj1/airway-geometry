@@ -26,7 +26,7 @@ rm /tmp/image_volume.vti
 rm /tmp/model.vtp
 rm /tmp/model.stl
 
-~/src/julia-0.4/julia bend-mesh.jl ../airway/data/slicexforms.hdf5 /tmp/model.off /tmp/modelb.off
+julia bend-mesh.jl ../airway_final/data/slicexforms.hdf5 /tmp/model.off /tmp/modelb.off
 rm /tmp/model.off
 
 meshlabserver -i /tmp/modelb.off -o /tmp/modelb.ply
